@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Lamu ki obosstha?</title>
+    <title>lamuuuuu </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -484,8 +484,8 @@
         if (prepend) chatBox.insertBefore(msgDiv, chatBox.firstChild); else chatBox.appendChild(msgDiv);
     }
 
-    function addMessage(text, sender, mediaUrl = null, mediaType = 'image', fileName = null, fileSize = null) {
-        const messageData = { text, sender, mediaUrl, mediaType, fileName, fileSize, timestamp: Date.now(), id: Date.now() + Math.random() };
+    function addMessage(text, sender, mediaUrl = null, mediaType = 'image', fileName = null, fileSize = null, timestamp = Date.now()) {
+        const messageData = { text, sender, mediaUrl, mediaType, fileName, fileSize, timestamp, id: Date.now() + Math.random() };
         chatHistory.push(messageData);
         saveChatHistory();
         displayMessage(messageData);
@@ -668,17 +668,20 @@
                             const photo = message.photo;
                             const video = message.video;
                             const document = message.document;
-                            if (text && !photo && !document && !video) addMessage(text, 'rumaisa');
+                            // Use the Unix timestamp from the Telegram message, converted to milliseconds
+                            const timestamp = message.date * 1000;
+
+                            if (text && !photo && !document && !video) addMessage(text, 'rumaisa', null, null, null, null, timestamp);
                             else if (photo) {
                                 const largestPhoto = photo[photo.length - 1];
                                 fetch(`https://api.telegram.org/bot${TOKEN}/getFile?file_id=${largestPhoto.file_id}`)
                                     .then(res => res.json())
-                                    .then(fileData => { if (fileData.ok) { const photoUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`; addMessage(text, 'rumaisa', photoUrl, 'image'); } });
+                                    .then(fileData => { if (fileData.ok) { const photoUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`; addMessage(text, 'rumaisa', photoUrl, 'image', null, null, timestamp); } });
                             } else if (video) {
                                 fetch(`https://api.telegram.org/bot${TOKEN}/getFile?file_id=${video.file_id}`)
                                     .then(res => res.json())
-                                    .then(fileData => { if (fileData.ok) { const videoUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`; addMessage(text, 'rumaisa', videoUrl, 'video', video.file_name, video.file_size); } });
-                            } else if (document) addMessage(text, 'rumaisa', null, 'document', document.file_name, document.file_size);
+                                    .then(fileData => { if (fileData.ok) { const videoUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`; addMessage(text, 'rumaisa', videoUrl, 'video', video.file_name, video.file_size, timestamp); } });
+                            } else if (document) addMessage(text, 'rumaisa', null, 'document', document.file_name, document.file_size, timestamp);
                         }
                     });
                 }
