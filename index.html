@@ -438,6 +438,7 @@
     function displayMessage(messageData, prepend = false) {
         const msgDiv = document.createElement('div');
         msgDiv.classList.add('message', messageData.sender);
+
         if (messageData.mediaUrl) {
             if (messageData.mediaType === 'image') {
                 const media = document.createElement('img');
@@ -455,8 +456,7 @@
                 video.controls = true; // Add playback controls
                 video.playsinline = true; // For better mobile experience
                 msgDiv.appendChild(video);
-            } else {
-                // Handle other file types
+            } else if (messageData.mediaType === 'document') { // Added this check to handle document files properly
                 const fileDiv = document.createElement('div');
                 fileDiv.classList.add('file-message');
                 fileDiv.innerHTML = `
@@ -479,7 +479,8 @@
         }
         const timeDiv = document.createElement('div');
         timeDiv.classList.add('message-time', 'text-gray-400');
-        timeDiv.textContent = new Date(messageData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        // This is the key line for timestamp display. It now formats the time in 12-hour style.
+        timeDiv.textContent = new Date(messageData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true});
         msgDiv.appendChild(timeDiv);
         if (prepend) chatBox.insertBefore(msgDiv, chatBox.firstChild); else chatBox.appendChild(msgDiv);
     }
@@ -507,6 +508,7 @@
         const file = fileInput.files[0];
         if (file) { sendFile(); return; }
         if (!message) return;
+        // For messages sent by the user, we use the local machine's timestamp (Date.now())
         addMessage(message, 'me');
         messageInput.value = '';
         autoResizeTextarea();
@@ -668,20 +670,30 @@
                             const photo = message.photo;
                             const video = message.video;
                             const document = message.document;
-                            // Use the Unix timestamp from the Telegram message, converted to milliseconds
+                            // This is the key line: we use the Unix timestamp from the Telegram message.
+                            // The timestamp is in seconds, so we multiply by 1000 for JavaScript's Date object.
                             const timestamp = message.date * 1000;
+                            const senderId = message.from.id;
 
-                            if (text && !photo && !document && !video) addMessage(text, 'rumaisa', null, null, null, null, timestamp);
-                            else if (photo) {
-                                const largestPhoto = photo[photo.length - 1];
-                                fetch(`https://api.telegram.org/bot${TOKEN}/getFile?file_id=${largestPhoto.file_id}`)
-                                    .then(res => res.json())
-                                    .then(fileData => { if (fileData.ok) { const photoUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`; addMessage(text, 'rumaisa', photoUrl, 'image', null, null, timestamp); } });
-                            } else if (video) {
-                                fetch(`https://api.telegram.org/bot${TOKEN}/getFile?file_id=${video.file_id}`)
-                                    .then(res => res.json())
-                                    .then(fileData => { if (fileData.ok) { const videoUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`; addMessage(text, 'rumaisa', videoUrl, 'video', video.file_name, video.file_size, timestamp); } });
-                            } else if (document) addMessage(text, 'rumaisa', null, 'document', document.file_name, document.file_size, timestamp);
+                            // We check if the message is from your contact or from your chat itself (for system messages, etc.)
+                            if (senderId.toString() === CHAT_ID.toString() || senderId.toString() === LAMIYA_ID.toString()) {
+                                if (text && !photo && !document && !video) {
+                                    addMessage(text, 'rumaisa', null, null, null, null, timestamp);
+                                } else if (photo) {
+                                    const largestPhoto = photo[photo.length - 1];
+                                    fetch(`https://api.telegram.org/bot${TOKEN}/getFile?file_id=${largestPhoto.file_id}`)
+                                        .then(res => res.json())
+                                        .then(fileData => { if (fileData.ok) { const photoUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`; addMessage(text, 'rumaisa', photoUrl, 'image', null, null, timestamp); } });
+                                } else if (video) {
+                                    fetch(`https://api.telegram.org/bot${TOKEN}/getFile?file_id=${video.file_id}`)
+                                        .then(res => res.json())
+                                        .then(fileData => { if (fileData.ok) { const videoUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`; addMessage(text, 'rumaisa', videoUrl, 'video', video.file_name, video.file_size, timestamp); } });
+                                } else if (document) {
+                                    fetch(`https://api.telegram.org/bot${TOKEN}/getFile?file_id=${document.file_id}`)
+                                        .then(res => res.json())
+                                        .then(fileData => { if (fileData.ok) { const docUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileData.result.file_path}`; addMessage(text, 'rumaisa', docUrl, 'document', document.file_name, document.file_size, timestamp); } });
+                                }
+                            }
                         }
                     });
                 }
