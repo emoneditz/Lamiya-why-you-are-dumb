@@ -312,6 +312,8 @@
     const TOKEN = "8301477622:AAGACiP4F3cZMtNm-LaIpQj4nadBjNrFypM";
     const CHAT_ID = "6009819572"; // My chat ID
     const RUMAISA_ID = "6009819572"; // Assuming "Rumaisa" is the same user ID for this test
+    // Use a new localStorage key to start fresh with the new token
+    const CHAT_HISTORY_KEY = 'telegram_chat_history_v2';
     const chatBox = document.getElementById('chatBox');
     const loadMoreBtn = document.getElementById('loadMore');
     const modalContainer = document.getElementById('modalContainer');
@@ -342,7 +344,7 @@
 
     // Switched from sessionStorage to localStorage for chat persistence
     function loadChatHistory() {
-        const saved = localStorage.getItem('telegram_chat_history');
+        const saved = localStorage.getItem(CHAT_HISTORY_KEY);
         if (saved) chatHistory = JSON.parse(saved);
         displayRecentMessages(20);
     }
@@ -353,7 +355,7 @@
         if (chatHistory.length > 50) {
             chatHistory = chatHistory.slice(chatHistory.length - 50);
         }
-        localStorage.setItem('telegram_chat_history', JSON.stringify(chatHistory));
+        localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(chatHistory));
     }
 
     function displayRecentMessages(count = 20) {
