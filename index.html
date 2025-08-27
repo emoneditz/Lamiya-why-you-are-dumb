@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Modern Chat - Persistent</title>
+    <title>Lamu ki obosstha?</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -245,7 +245,7 @@
 
 <div class="chat-container">
     <div class="chat-header">
-        <h3 class="font-bold text-lg tracking-wide">💬 To lamu hothat ki mone kore? </h3>
+        <h3 class="font-bold text-lg tracking-wide">💬 To lamu hothat ki mone kore?</h3>
         <!-- New Online/Offline status section -->
         <div class="mt-2 text-sm font-semibold flex items-center gap-2">
             <button id="statusBtn" class="px-3 py-1 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors duration-200">
@@ -311,9 +311,9 @@
 <script>
     const TOKEN = "8301477622:AAGACiP4F3cZMtNm-LaIpQj4nadBjNrFypM";
     const CHAT_ID = "6009819572"; // My chat ID
-    const RUMAISA_ID = "6009819572"; // Assuming "Rumaisa" is the same user ID for this test
-    // Use a new localStorage key to start fresh with the new token
-    const CHAT_HISTORY_KEY = 'telegram_chat_history_v2';
+    const LAMIYA_ID = "6009819572"; // Lamiya's Telegram user ID
+    // Use a new localStorage key for a fresh start
+    const CHAT_HISTORY_KEY = 'lamu_hothat_chat_history';
     const chatBox = document.getElementById('chatBox');
     const loadMoreBtn = document.getElementById('loadMore');
     const modalContainer = document.getElementById('modalContainer');
@@ -633,7 +633,7 @@
                     for (const update of data.result) {
                         lastUpdateId = update.update_id;
                         const message = update.message;
-                        if (message && message.from.id == RUMAISA_ID) {
+                        if (message && message.from.id == LAMIYA_ID) {
                             const messageText = (message.text || '').toLowerCase();
                             if (messageText.includes('yes') || messageText.includes('yeah') || messageText.includes('i am online')) {
                                 console.log("Online status confirmed by response.");
